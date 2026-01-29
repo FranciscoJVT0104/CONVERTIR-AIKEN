@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Convertidor a Formato AIKEN</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #eef2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 260px;
+            margin-top: 10px;
+        }
+
+        button {
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: #004aad;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0066ff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>🔄 Convertidor a Formato AIKEN</h2>
+
+        <h4>📥 Pega aquí el contenido original</h4>
+        <textarea id="entrada"></textarea>
+
+        <button onclick="convertir()">⚙ Convertir a AIKEN</button>
+
+        <h4>📤 Resultado en formato AIKEN</h4>
+        <textarea id="salida"></textarea>
+
+        <button onclick="descargar()">⬇ Descargar AIKEN</button>
+    </div>
+
+    <script>
+        function convertir() {
+            const texto = document.getElementById("entrada").value;
+            const lineas = texto.split("\n").map(l => l.trim()).filter(l => l);
+
+            const bloques = [];
+            let i = 0;
+
+            while (i < lineas.length) {
+
+                // Detectar pregunta (empieza con número)
+                if (!/^\d+[\.\-]/.test(lineas[i])) {
+                    i++;
+                    continue;
+                }
+
+                const pregunta = lineas[i]
+                    .replace(/^\s*\d+\s*[\.\-–—]*\s*/u, "")
+                    .replace(/^[-–—]+/, "")
+                    .trim();
+                i++;
+
+                const opciones = [];
+
+                // Leer opciones a) - e)
+                while (i < lineas.length && /^[a-e]\)/i.test(lineas[i])) {
+                    const textoOpcion = lineas[i]
+                        .replace(/^[a-e]\)\s*/i, "")
+                        .replace(/\s*X\s*$/i, "")
+                        .trim();
+
+                    const esCorrecta = /X\s*$/i.test(lineas[i]);
+                    opciones.push({ texto: textoOpcion, correcta: esCorrecta });
+                    i++;
+                }
+
+                // Reordenar: correcta primero
+                const correcta = opciones.find(o => o.correcta);
+                const incorrectas = opciones.filter(o => !o.correcta);
+
+                if (!correcta || incorrectas.length !== 4) continue;
+
+                const ordenFinal = [correcta, ...incorrectas];
+
+                // Construir bloque AIKEN
+                let bloque = pregunta + "\n";
+                const letras = ["A", "B", "C", "D", "E"];
+
+                ordenFinal.forEach((op, idx) => {
+                    bloque += `${letras[idx]}. ${op.texto}\n`;
+                });
+
+                bloque += "ANSWER: A";
+
+                bloques.push(bloque);
+            }
+
+            document.getElementById("salida").value = bloques.join("\n\n");
+        }
+
+        function descargar() {
+            const txt = document.getElementById("salida").value;
+            if (!txt) return alert("No hay contenido");
+            const blob = new Blob([txt], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "convertido_aiken.txt";
+            a.click();
+        }
+    </script>
+</body>
+
+</html>
