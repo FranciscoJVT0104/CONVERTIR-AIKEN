@@ -81,10 +81,10 @@
 
                 const opciones = [];
 
-                // Leer opciones a) - e)
-                while (i < lineas.length && /^[a-e]\)/i.test(lineas[i])) {
+                // Leer opciones (acepta variantes como A), a), A. o a.)
+                while (i < lineas.length && /^[a-e][\)\.]/i.test(lineas[i])) {
                     const textoOpcion = lineas[i]
-                        .replace(/^[a-e]\)\s*/i, "")
+                        .replace(/^[a-e][\)\.]\s*/i, "")
                         .replace(/\s*X\s*$/i, "")
                         .trim();
 
