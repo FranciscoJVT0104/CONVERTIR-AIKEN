@@ -83,12 +83,13 @@
 
                 // Leer opciones (acepta variantes como A), a), A. o a.)
                 while (i < lineas.length && /^[a-e][\)\.]/i.test(lineas[i])) {
+                const marcadorCorrecta = /\b(?:X|ANSWER|ANS)\s*$/i;
                     const textoOpcion = lineas[i]
                         .replace(/^[a-e][\)\.]\s*/i, "")
-                        .replace(/\s*X\s*$/i, "")
+                        .replace(new RegExp(`\\s*${marcadorCorrecta.source}`, "i"), "")
                         .trim();
 
-                    const esCorrecta = /X\s*$/i.test(lineas[i]);
+                    const esCorrecta = marcadorCorrecta.test(lineas[i]);
                     opciones.push({ texto: textoOpcion, correcta: esCorrecta });
                     i++;
                 }
